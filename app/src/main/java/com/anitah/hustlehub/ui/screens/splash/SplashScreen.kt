@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.anitah.hustlehub.navigation.ROUT_ONBOARDING
+import com.anitah.hustlehub.navigation.ROUT_REGISTER
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -35,7 +36,7 @@ fun SplashScreen(navController: NavController){
 
     coroutinecope.launch{
         delay(2000)
-        navController.navigate(ROUT_ONBOARDING)
+        navController.navigate(ROUT_REGISTER)
     }
 
     var visible by remember { mutableStateOf(false) }
@@ -159,8 +160,77 @@ fun SplashScreen(navController: NavController){
     }
 }
 
-@Preview(showBackground = true)
+// ── Separate preview — no NavController, no coroutine crash ────────────────
+@Preview(showBackground = true, backgroundColor = 0xFF0A0F1E)
 @Composable
 fun SplashScreenPreview(){
-    SplashScreen(rememberNavController())
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(Color(0xFF0D1A35), Color(0xFF0A0F1E))
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+            Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .size(110.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(Color(0xFF00E5C3), Color(0xFF0066FF))
+                            )
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF0A0F1E)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "💼", fontSize = 40.sp)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            Text(
+                text = "HustleHub",
+                fontSize = 42.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF00E5C3),
+                letterSpacing = (-1).sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(Color(0xFF00E5C3), Color(0xFF0066FF))
+                        )
+                    )
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Own Your Craft.",
+                fontSize = 15.sp,
+                color = Color.White.copy(alpha = 0.65f),
+                letterSpacing = 1.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }

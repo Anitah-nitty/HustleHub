@@ -22,10 +22,11 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun RegisterScreen(navController: NavController) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -44,24 +45,24 @@ fun LoginScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center
     ) {
 
-        Text(text = "💼", fontSize = 64.sp)
+        Text(text = "🚀", fontSize = 64.sp)
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "HustleHub",
-            fontSize = 32.sp,
+            text = "Create Account",
+            fontSize = 30.sp,
             fontWeight = FontWeight.ExtraBold,
             color = teal
         )
 
         Text(
-            text = "Login to your account",
+            text = "Join HustleHub today",
             fontSize = 14.sp,
             color = Color.White.copy(alpha = 0.5f)
         )
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
             value = email,
@@ -116,7 +117,30 @@ fun LoginScreen(navController: NavController) {
             shape = RoundedCornerShape(14.dp)
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirm Password", color = teal) },
+            leadingIcon = { Text("🔒", fontSize = 18.sp) },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = teal,
+                unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                cursorColor = teal,
+                focusedContainerColor = navyMid,
+                unfocusedContainerColor = navyMid
+            ),
+            shape = RoundedCornerShape(14.dp)
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (errorMessage.isNotEmpty()) {
             Text(
@@ -140,23 +164,31 @@ fun LoginScreen(navController: NavController) {
         ) {
             Button(
                 onClick = {
-                    if (email.isEmpty() || password.isEmpty()) {
+                    if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                         errorMessage = "Please fill in all fields"
+                        return@Button
+                    }
+                    if (password != confirmPassword) {
+                        errorMessage = "Passwords do not match"
+                        return@Button
+                    }
+                    if (password.length < 6) {
+                        errorMessage = "Password must be at least 6 characters"
                         return@Button
                     }
                     // Firebase moved inside onClick — fixes preview crash
                     val auth = FirebaseAuth.getInstance()
                     isLoading = true
-                    auth.signInWithEmailAndPassword(email, password)
+                    auth.createUserWithEmailAndPassword(email, password)
                         .addOnSuccessListener {
                             isLoading = false
                             navController.navigate("home") {
-                                popUpTo("login") { inclusive = true }
+                                popUpTo("register") { inclusive = true }
                             }
                         }
                         .addOnFailureListener { e ->
                             isLoading = false
-                            errorMessage = e.message ?: "Login failed"
+                            errorMessage = e.message ?: "Registration failed"
                         }
                 },
                 modifier = Modifier.fillMaxSize(),
@@ -171,7 +203,7 @@ fun LoginScreen(navController: NavController) {
                     )
                 } else {
                     Text(
-                        text = "Login",
+                        text = "Register",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = navy
@@ -187,13 +219,13 @@ fun LoginScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Don't have an account? ",
+                text = "Already have an account? ",
                 color = Color.White.copy(alpha = 0.5f),
                 fontSize = 13.sp
             )
-            TextButton(onClick = { navController.navigate("register") }) {
+            TextButton(onClick = { navController.navigate("login") }) {
                 Text(
-                    text = "Sign Up",
+                    text = "Login",
                     color = teal,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp
@@ -205,6 +237,6 @@ fun LoginScreen(navController: NavController) {
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0F1E)
 @Composable
-fun LoginScreenPreview() {
-    LoginScreen(navController = rememberNavController())
+fun RegisterScreenPreview() {
+    RegisterScreen(navController = rememberNavController())
 }

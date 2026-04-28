@@ -7,6 +7,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.anitah.hustlehub.ui.screens.auth.LoginScreen
+import com.anitah.hustlehub.ui.screens.auth.RegisterScreen
+import com.anitah.hustlehub.ui.screens.home.HomeScreen
+import com.anitah.hustlehub.ui.screens.postskill.PostSkillScreen
+import com.anitah.hustlehub.ui.screens.profile.ProfileScreen
+import com.anitah.hustlehub.ui.screens.skilldetail.SkillDetailScreen
 import com.anitah.hustlehub.ui.screens.splash.SplashScreen
 
 @Composable
@@ -23,6 +29,32 @@ fun AppNavHost(modifier: Modifier = Modifier,
         composable(ROUT_SPLASH) {
             SplashScreen(navController)
         }
+
+        composable(ROUT_REGISTER) {
+            RegisterScreen(navController)
+        }
+
+        composable(ROUT_LOGIN) {
+            LoginScreen(navController)
+        }
+
+        composable(ROUT_HOME) {
+            HomeScreen(navController)
+        }
+
+        composable(ROUT_POSTSKILL) {
+            PostSkillScreen(navController)
+        }
+
+        composable(ROUT_SKILLDETAIL) {
+            SkillDetailScreen(navController)
+        }
+
+        composable(ROUT_PROFILE) {
+            ProfileScreen(navController)
+        }
+
+
     }
 
 }

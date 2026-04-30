@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 @Composable
 fun PostSkillScreen(navController: NavController) {
@@ -28,11 +30,25 @@ fun PostSkillScreen(navController: NavController) {
     var skillLocation by remember { mutableStateOf("") }
     var successMessage by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     val teal = Color(0xFF00E5C3)
     val navy = Color(0xFF0A0F1E)
     val navyMid = Color(0xFF0D1A35)
     val blue = Color(0xFF0066FF)
+
+    // Reusable colors for all fields
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = teal,
+        unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
+        focusedTextColor = Color.White,
+        unfocusedTextColor = Color.White,
+        cursorColor = teal,
+        focusedContainerColor = navyMid,
+        unfocusedContainerColor = navyMid,
+        focusedPlaceholderColor = Color.White.copy(alpha = 0.3f),
+        unfocusedPlaceholderColor = Color.White.copy(alpha = 0.3f)
+    )
 
     Column(
         modifier = Modifier
@@ -80,7 +96,8 @@ fun PostSkillScreen(navController: NavController) {
                 onValueChange = { skillTitle = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("e.g. Logo Design") },
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = fieldColors
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -94,7 +111,8 @@ fun PostSkillScreen(navController: NavController) {
                 onValueChange = { skillCategory = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("e.g. Design, Tech") },
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = fieldColors
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -109,7 +127,8 @@ fun PostSkillScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Describe your skill...") },
                 maxLines = 4,
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = fieldColors
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -123,7 +142,8 @@ fun PostSkillScreen(navController: NavController) {
                 onValueChange = { skillPrice = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("e.g. 500") },
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = fieldColors
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -137,7 +157,8 @@ fun PostSkillScreen(navController: NavController) {
                 onValueChange = { skillLocation = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("e.g. Nairobi") },
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(14.dp),
+                colors = fieldColors
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -164,7 +185,6 @@ fun PostSkillScreen(navController: NavController) {
             ) {
                 Button(
                     onClick = {
-
                         if (skillTitle.isEmpty() ||
                             skillCategory.isEmpty() ||
                             skillDescription.isEmpty() ||
@@ -173,22 +193,52 @@ fun PostSkillScreen(navController: NavController) {
                         ) {
                             errorMessage = "Please fill in all fields"
                             successMessage = ""
-                        } else {
-                            successMessage = "Skill posted successfully!"
-                            errorMessage = ""
-
-                            skillTitle = ""
-                            skillCategory = ""
-                            skillDescription = ""
-                            skillPrice = ""
-                            skillLocation = ""
+                            return@Button
                         }
+
+                        isLoading = true
+                        val db = FirebaseDatabase.getInstance().reference
+                        val user = FirebaseAuth.getInstance().currentUser
+
+                        val skill = hashMapOf(
+                            "title" to skillTitle,
+                            "category" to skillCategory,
+                            "description" to skillDescription,
+                            "price" to skillPrice,
+                            "location" to skillLocation,
+                            "postedBy" to (user?.email ?: "unknown")
+                        )
+
+                        db.child("skills").push().setValue(skill)
+                            .addOnSuccessListener {
+                                isLoading = false
+                                successMessage = "✅ Skill posted successfully!"
+                                errorMessage = ""
+                                skillTitle = ""
+                                skillCategory = ""
+                                skillDescription = ""
+                                skillPrice = ""
+                                skillLocation = ""
+                            }
+                            .addOnFailureListener { e ->
+                                isLoading = false
+                                errorMessage = e.message ?: "Failed to post skill"
+                                successMessage = ""
+                            }
                     },
                     modifier = Modifier.fillMaxSize(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     elevation = null
                 ) {
-                    Text("Post Skill", color = navy, fontWeight = FontWeight.Bold)
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = navy,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Post Skill", color = navy, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
 

@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -61,5 +62,7 @@ dependencies {
     implementation("androidx.navigation:navigation-runtime-ktx:2.9.4")
     implementation("androidx.navigation:navigation-compose:2.9.4")
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("com.google.firebase:firebase-database-ktx:20.3.0")
+
 
 }

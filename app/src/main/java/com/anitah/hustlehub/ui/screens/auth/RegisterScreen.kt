@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun RegisterScreen(navController: NavController) {
 
+    var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -63,6 +64,28 @@ fun RegisterScreen(navController: NavController) {
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        OutlinedTextField(
+            value = fullName,
+            onValueChange = { fullName = it },
+            label = { Text("Full Name", color = teal) },
+            leadingIcon = { Text("👤", color = teal, fontSize = 18.sp) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = teal,
+                unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                cursorColor = teal,
+                focusedContainerColor = navyMid,
+                unfocusedContainerColor = navyMid
+            ),
+            shape = RoundedCornerShape(14.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = email,
@@ -164,7 +187,7 @@ fun RegisterScreen(navController: NavController) {
         ) {
             Button(
                 onClick = {
-                    if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                    if (fullName.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                         errorMessage = "Please fill in all fields"
                         return@Button
                     }
@@ -176,7 +199,6 @@ fun RegisterScreen(navController: NavController) {
                         errorMessage = "Password must be at least 6 characters"
                         return@Button
                     }
-                    // Firebase moved inside onClick — fixes preview crash
                     val auth = FirebaseAuth.getInstance()
                     isLoading = true
                     auth.createUserWithEmailAndPassword(email, password)

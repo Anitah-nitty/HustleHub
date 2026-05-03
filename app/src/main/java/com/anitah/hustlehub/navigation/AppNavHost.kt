@@ -1,6 +1,5 @@
 package com.anitah.hustlehub.navigation
 
-import android.widget.MediaController
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -16,16 +15,18 @@ import com.anitah.hustlehub.ui.screens.skilldetail.SkillDetailScreen
 import com.anitah.hustlehub.ui.screens.splash.SplashScreen
 
 @Composable
-fun AppNavHost(modifier: Modifier = Modifier,
-               navController: NavHostController= rememberNavController(),
-               startDestination: String = ROUT_SPLASH){
-
+fun AppNavHost(
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController(),
+    startDestination: String = ROUT_SPLASH
+) {
 
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
+
         composable(ROUT_SPLASH) {
             SplashScreen(navController)
         }
@@ -46,20 +47,20 @@ fun AppNavHost(modifier: Modifier = Modifier,
             PostSkillScreen(navController)
         }
 
-        composable(ROUT_SKILLDETAIL) {
-            SkillDetailScreen(navController)
+        composable("skilldetail/{title}/{category}/{description}/{price}/{location}/{postedBy}") { backStackEntry ->
+            SkillDetailScreen(
+                navController = navController,
+                title = backStackEntry.arguments?.getString("title") ?: "",
+                category = backStackEntry.arguments?.getString("category") ?: "",
+                description = backStackEntry.arguments?.getString("description") ?: "",
+                price = backStackEntry.arguments?.getString("price") ?: "",
+                location = backStackEntry.arguments?.getString("location") ?: "",
+                postedBy = backStackEntry.arguments?.getString("postedBy") ?: ""
+            )
         }
 
         composable(ROUT_PROFILE) {
             ProfileScreen(navController)
         }
-
-
     }
-
 }
-
-
-
-
-

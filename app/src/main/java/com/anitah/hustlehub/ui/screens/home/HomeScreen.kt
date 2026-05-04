@@ -38,12 +38,29 @@ fun HomeScreen(navController: NavController) {
     val blue = Color(0xFF0066FF)
 
     val user = FirebaseAuth.getInstance().currentUser
-    val userName = user?.email?.substringBefore("@") ?: "User"
+    val userEmail = user?.email ?: ""
+
+    // Default name from email, updates from database if saved
+    var userName by remember { mutableStateOf(userEmail.substringBefore("@")) }
 
     var skillsList by remember { mutableStateOf(listOf<Map<String, Any>>()) }
     var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(user?.uid) {
+
+        // Fetch updated display name from database
+        val uid = user?.uid ?: return@LaunchedEffect
+        FirebaseDatabase.getInstance().reference
+            .child("users").child(uid).child("displayName")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val savedName = snapshot.getValue(String::class.java)
+                if (!savedName.isNullOrEmpty()) {
+                    userName = savedName
+                }
+            }
+
+        // Fetch skills
         val db = FirebaseDatabase.getInstance().reference
         db.child("skills").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -55,7 +72,16 @@ fun HomeScreen(navController: NavController) {
                     val price = skillSnapshot.child("price").getValue(String::class.java) ?: ""
                     val location = skillSnapshot.child("location").getValue(String::class.java) ?: ""
                     val postedBy = skillSnapshot.child("postedBy").getValue(String::class.java) ?: ""
-                    fetched.add(mapOf("title" to title, "category" to category, "description" to description, "price" to price, "location" to location, "postedBy" to postedBy))
+                    fetched.add(
+                        mapOf(
+                            "title" to title,
+                            "category" to category,
+                            "description" to description,
+                            "price" to price,
+                            "location" to location,
+                            "postedBy" to postedBy
+                        )
+                    )
                 }
                 skillsList = fetched
                 isLoading = false
@@ -82,6 +108,7 @@ fun HomeScreen(navController: NavController) {
                     )
                 )
         ) {
+            // Glow blobs
             Box(
                 modifier = Modifier
                     .size(160.dp)
@@ -97,6 +124,7 @@ fun HomeScreen(navController: NavController) {
                     .background(blue.copy(alpha = 0.08f))
             )
 
+            // Top bar — logo + profile avatar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -105,6 +133,7 @@ fun HomeScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // App logo + name
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
@@ -126,6 +155,7 @@ fun HomeScreen(navController: NavController) {
                     )
                 }
 
+                // Profile avatar — click to go to profile
                 Box(
                     modifier = Modifier
                         .size(42.dp)
@@ -145,6 +175,7 @@ fun HomeScreen(navController: NavController) {
                 }
             }
 
+            // Welcome text — shows updated name
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -181,16 +212,16 @@ fun HomeScreen(navController: NavController) {
             )
             StatCard(
                 icon = "👥",
-                value = "Active",
-                label = "Community",
+                value = "Free",
+                label = "To Join",
                 teal = teal,
                 navyMid = navyMid,
                 modifier = Modifier.weight(1f)
             )
             StatCard(
                 icon = "💰",
-                value = "Earn",
-                label = "Your Way",
+                value = "Ksh",
+                label = "Earn Daily",
                 teal = teal,
                 navyMid = navyMid,
                 modifier = Modifier.weight(1f)
@@ -204,7 +235,9 @@ fun HomeScreen(navController: NavController) {
                 .padding(horizontal = 24.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(
-                    Brush.linearGradient(colors = listOf(teal.copy(alpha = 0.2f), blue.copy(alpha = 0.2f)))
+                    Brush.linearGradient(
+                        colors = listOf(teal.copy(alpha = 0.2f), blue.copy(alpha = 0.2f))
+                    )
                 )
                 .clickable { navController.navigate(ROUT_POSTSKILL) }
                 .padding(20.dp)
@@ -319,7 +352,6 @@ fun HomeScreen(navController: NavController) {
                 teal = teal,
                 navyMid = navyMid,
                 onClick = {
-                    // Pass all skill data to SkillDetailScreen
                     navController.navigate(
                         "skilldetail/$title/$category/$description/$price/$location/$postedBy"
                     )
@@ -423,7 +455,12 @@ fun ServiceCard(
                     .background(teal.copy(alpha = 0.15f))
                     .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
-                Text(text = "View", fontSize = 12.sp, color = teal, fontWeight = FontWeight.SemiBold)
+                Text(
+                    text = "View",
+                    fontSize = 12.sp,
+                    color = teal,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
